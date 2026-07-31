@@ -18,7 +18,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category addCategory(Category category) {
-        return categoryRepository.save(category);
+        try {
+            category.setId(null);
+            return categoryRepository.save(category);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
