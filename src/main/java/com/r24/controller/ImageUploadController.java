@@ -1,45 +1,33 @@
-    package com.r24.controller;
+package com.r24.controller;
 
-    import org.springframework.beans.factory.annotation.Value;
-    import org.springframework.http.ResponseEntity;
-    import org.springframework.util.StringUtils;
-    import org.springframework.web.bind.annotation.*;
-    import org.springframework.web.multipart.MultipartFile;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-    import java.io.File;
-    import java.io.IOException;
-    import java.nio.file.Files;
-    import java.nio.file.Path;
-    import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.Map;
 
-    @RestController
-    @RequestMapping("/api/upload")
-    @CrossOrigin(origins = "*")
-    public class ImageUploadController {
+@RestController
+@RequestMapping("/api/upload")
+@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
+public class ImageUploadController {
 
-        @Value("${file.upload-dir:uploads}")
-        private String uploadDir;
+    private final Cloudinary cloudinary;
 
-        @PostMapping
-        public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
 
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("No file selected");
-            }
+        Map uploadResult = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.emptyMap()
+        );
 
-            File directory = new File(uploadDir);
+        String imageUrl = uploadResult.get("secure_url").toString();
 
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
-            String fileName = System.currentTimeMillis() + "_"
-                    + StringUtils.cleanPath(file.getOriginalFilename());
-
-            Path path = Paths.get(uploadDir, fileName);
-
-            Files.copy(file.getInputStream(), path);
-
-            return ResponseEntity.ok(fileName);
-        }
+        return ResponseEntity.ok(imageUrl);
     }
+}
