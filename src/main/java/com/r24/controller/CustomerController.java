@@ -39,6 +39,8 @@ public class CustomerController {
 
         customer.setName(updates.getName());
         customer.setEmail(updates.getEmail());
+        customer.setBikeModel(updates.getBikeModel());
+        customer.setPurchaseYear(updates.getPurchaseYear());
 
         return customerRepository.save(customer);
     }

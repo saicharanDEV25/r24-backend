@@ -25,5 +25,9 @@ public class Customer {
 
     private String email;
 
+    private String bikeModel;
+
+    private Integer purchaseYear;
+
     private LocalDateTime createdAt;
 }
