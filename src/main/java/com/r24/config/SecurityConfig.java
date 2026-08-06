@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/api/contact/**",
                                 "/api/customers/**",
                                 "/api/favorites/**",
-                                "/api/chat-leads/**"
+                                "/api/chat-leads/**",
+                                "/api/analytics/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

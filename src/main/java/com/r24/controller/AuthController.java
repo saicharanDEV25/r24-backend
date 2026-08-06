@@ -2,6 +2,7 @@ package com.r24.controller;
 
 import com.r24.dto.LoginRequest;
 import com.r24.dto.LoginResponse;
+import com.r24.exception.UnauthorizedException;
 import com.r24.security.jwt.JwtUtil;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,6 @@ public class AuthController {
             return new LoginResponse(token);
         }
 
-        throw new RuntimeException("Invalid Username or Password");
+        throw new UnauthorizedException("Invalid Username or Password");
     }
 }

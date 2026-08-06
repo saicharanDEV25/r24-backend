@@ -5,6 +5,7 @@ import com.r24.dto.OtpRequest;
 import com.r24.dto.OtpVerifyRequest;
 import com.r24.entity.Customer;
 import com.r24.entity.OtpVerification;
+import com.r24.exception.BadRequestException;
 import com.r24.repository.CustomerRepository;
 import com.r24.repository.OtpVerificationRepository;
 import com.r24.security.jwt.JwtUtil;
@@ -45,7 +46,7 @@ public class CustomerAuthController {
         String phone = request.getPhoneNumber();
 
         if (phone == null || !phone.matches("^[6-9]\\d{9}$")) {
-            throw new RuntimeException("Enter a valid 10 digit mobile number");
+            throw new BadRequestException("Enter a valid 10 digit mobile number");
         }
 
         String code = String.valueOf(100000 + new Random().nextInt(900000));
@@ -71,14 +72,14 @@ public class CustomerAuthController {
 
         OtpVerification otp = otpRepository
                 .findTopByPhoneNumberAndUsedFalseOrderByCreatedAtDesc(request.getPhoneNumber())
-                .orElseThrow(() -> new RuntimeException("No OTP found, please request a new one"));
+                .orElseThrow(() -> new BadRequestException("No OTP found, please request a new one"));
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP expired, please request a new one");
+            throw new BadRequestException("OTP expired, please request a new one");
         }
 
         if (!otp.getCode().equals(request.getCode())) {
-            throw new RuntimeException("Incorrect OTP");
+            throw new BadRequestException("Incorrect OTP");
         }
 
         otp.setUsed(true);

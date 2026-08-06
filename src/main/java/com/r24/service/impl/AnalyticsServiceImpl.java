@@ -1,0 +1,87 @@
+package com.r24.service.impl;
+
+import com.r24.dto.AnalyticsSummaryResponse;
+import com.r24.dto.DailyVisitStat;
+import com.r24.entity.SiteVisit;
+import com.r24.repository.SiteVisitRepository;
+import com.r24.service.AnalyticsService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+public class AnalyticsServiceImpl implements AnalyticsService {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
+
+    private final SiteVisitRepository repository;
+
+    public AnalyticsServiceImpl(SiteVisitRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public SiteVisit trackVisit(String visitorId, String path) {
+        return repository.save(
+                SiteVisit.builder()
+                        .visitorId(visitorId)
+                        .path(path)
+                        .visitedAt(LocalDateTime.now())
+                        .build()
+        );
+    }
+
+    @Override
+    public AnalyticsSummaryResponse getSummary() {
+
+        LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+        LocalDateTime startOfWeek = startOfToday.minusDays(6);
+        LocalDateTime startOfMonth = startOfToday.minusDays(29);
+
+        long visitsToday = repository.countByVisitedAtAfter(startOfToday);
+        long visitsThisWeek = repository.countByVisitedAtAfter(startOfWeek);
+        long visitsThisMonth = repository.countByVisitedAtAfter(startOfMonth);
+
+        long uniqueToday = repository.countDistinctVisitorsSince(startOfToday);
+        long uniqueThisWeek = repository.countDistinctVisitorsSince(startOfWeek);
+        long uniqueThisMonth = repository.countDistinctVisitorsSince(startOfMonth);
+
+        List<DailyVisitStat> last7Days = buildLast7DaysStats(startOfWeek);
+
+        return new AnalyticsSummaryResponse(
+                visitsToday,
+                visitsThisWeek,
+                visitsThisMonth,
+                uniqueToday,
+                uniqueThisWeek,
+                uniqueThisMonth,
+                last7Days
+        );
+    }
+
+    private List<DailyVisitStat> buildLast7DaysStats(LocalDateTime since) {
+
+        List<SiteVisit> recentVisits = repository.findByVisitedAtAfter(since);
+
+        Map<LocalDate, List<SiteVisit>> byDay = recentVisits.stream()
+                .collect(Collectors.groupingBy(v -> v.getVisitedAt().toLocalDate()));
+
+        return java.util.stream.IntStream.rangeClosed(0, 6)
+                .mapToObj(i -> LocalDate.now().minusDays(6 - i))
+                .map(day -> {
+                    List<SiteVisit> dayVisits = byDay.getOrDefault(day, List.of());
+                    long visits = dayVisits.size();
+                    long uniqueVisitors = dayVisits.stream()
+                            .map(SiteVisit::getVisitorId)
+                            .distinct()
+                            .count();
+                    return new DailyVisitStat(day.format(DATE_FORMAT), visits, uniqueVisitors);
+                })
+                .collect(Collectors.toList());
+    }
+}
