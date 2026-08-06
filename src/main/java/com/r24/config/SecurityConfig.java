@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 "/api/products/**",
                                 "/api/categories/**",
                                 "/api/gallery/**",
+                                "/api/reviews/**",
                                 "/api/bookings/**",
                                 "/api/contact/**"
                         ).permitAll()
