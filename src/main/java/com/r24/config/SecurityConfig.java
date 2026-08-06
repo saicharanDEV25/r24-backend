@@ -42,7 +42,10 @@ public class SecurityConfig {
                                 "/api/gallery/**",
                                 "/api/reviews/**",
                                 "/api/bookings/**",
-                                "/api/contact/**"
+                                "/api/contact/**",
+                                "/api/customers/**",
+                                "/api/favorites/**",
+                                "/api/chat-leads/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

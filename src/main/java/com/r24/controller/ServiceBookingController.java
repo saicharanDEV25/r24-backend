@@ -1,7 +1,10 @@
 package com.r24.controller;
 
 import com.r24.entity.ServiceBooking;
+import com.r24.repository.ServiceBookingRepository;
+import com.r24.security.CustomerAuthHelper;
 import com.r24.service.ServiceBookingService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +15,21 @@ import java.util.List;
 public class ServiceBookingController {
 
     private final ServiceBookingService service;
+    private final ServiceBookingRepository repository;
+    private final CustomerAuthHelper authHelper;
 
-    public ServiceBookingController(ServiceBookingService service) {
+    public ServiceBookingController(ServiceBookingService service,
+                                     ServiceBookingRepository repository,
+                                     CustomerAuthHelper authHelper) {
         this.service = service;
+        this.repository = repository;
+        this.authHelper = authHelper;
+    }
+
+    @GetMapping("/my")
+    public List<ServiceBooking> getMyBookings(HttpServletRequest request) {
+        String phone = authHelper.resolvePhoneNumber(request);
+        return repository.findByPhoneNumber(phone);
     }
 
     @PostMapping
