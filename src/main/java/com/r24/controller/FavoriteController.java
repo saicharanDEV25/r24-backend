@@ -3,6 +3,7 @@ package com.r24.controller;
 import com.r24.entity.Customer;
 import com.r24.entity.Favorite;
 import com.r24.entity.Product;
+import com.r24.exception.ResourceNotFoundException;
 import com.r24.repository.CustomerRepository;
 import com.r24.repository.FavoriteRepository;
 import com.r24.repository.ProductRepository;
@@ -37,7 +38,7 @@ public class FavoriteController {
     private Customer currentCustomer(HttpServletRequest request) {
         String phone = authHelper.resolvePhoneNumber(request);
         return customerRepository.findByPhoneNumber(phone)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 
     @GetMapping
@@ -65,7 +66,7 @@ public class FavoriteController {
         }
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         favoriteRepository.save(
                 Favorite.builder()

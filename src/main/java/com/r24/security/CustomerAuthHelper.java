@@ -1,5 +1,6 @@
 package com.r24.security;
 
+import com.r24.exception.UnauthorizedException;
 import com.r24.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
@@ -25,13 +26,13 @@ public class CustomerAuthHelper {
         String header = request.getHeader("Authorization");
 
         if (header == null || !header.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
+            throw new UnauthorizedException("Missing or invalid Authorization header");
         }
 
         String token = header.substring(7);
 
         if (!jwtUtil.validateToken(token)) {
-            throw new RuntimeException("Invalid or expired session, please log in again");
+            throw new UnauthorizedException("Invalid or expired session, please log in again");
         }
 
         return jwtUtil.extractUsername(token);

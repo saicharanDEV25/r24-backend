@@ -1,6 +1,7 @@
 package com.r24.controller;
 
 import com.r24.entity.Customer;
+import com.r24.exception.ResourceNotFoundException;
 import com.r24.repository.CustomerRepository;
 import com.r24.security.CustomerAuthHelper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ public class CustomerController {
         String phone = authHelper.resolvePhoneNumber(request);
 
         return customerRepository.findByPhoneNumber(phone)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 
     @PutMapping("/me")
@@ -34,7 +35,7 @@ public class CustomerController {
         String phone = authHelper.resolvePhoneNumber(request);
 
         Customer customer = customerRepository.findByPhoneNumber(phone)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         customer.setName(updates.getName());
         customer.setEmail(updates.getEmail());
