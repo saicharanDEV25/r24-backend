@@ -7,19 +7,24 @@ import com.r24.repository.SiteVisitRepository;
 import com.r24.service.AnalyticsService;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
 public class AnalyticsServiceImpl implements AnalyticsService {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final Duration ONLINE_WINDOW = Duration.ofSeconds(90);
 
     private final SiteVisitRepository repository;
+    private final Map<String, Instant> lastSeen = new ConcurrentHashMap<>();
 
     public AnalyticsServiceImpl(SiteVisitRepository repository) {
         this.repository = repository;
@@ -27,6 +32,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public SiteVisit trackVisit(String visitorId, String path) {
+        heartbeat(visitorId);
+
         return repository.save(
                 SiteVisit.builder()
                         .visitorId(visitorId)
@@ -34,6 +41,19 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                         .visitedAt(LocalDateTime.now())
                         .build()
         );
+    }
+
+    @Override
+    public void heartbeat(String visitorId) {
+        lastSeen.put(visitorId, Instant.now());
+    }
+
+    @Override
+    public long getOnlineCount() {
+        Instant cutoff = Instant.now().minus(ONLINE_WINDOW);
+        return lastSeen.values().stream()
+                .filter(seenAt -> seenAt.isAfter(cutoff))
+                .count();
     }
 
     @Override

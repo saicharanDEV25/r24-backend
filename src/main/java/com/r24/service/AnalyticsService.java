@@ -8,4 +8,8 @@ public interface AnalyticsService {
     SiteVisit trackVisit(String visitorId, String path);
 
     AnalyticsSummaryResponse getSummary();
+
+    void heartbeat(String visitorId);
+
+    long getOnlineCount();
 }

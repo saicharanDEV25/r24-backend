@@ -22,6 +22,16 @@ public class AnalyticsController {
         analyticsService.trackVisit(body.get("visitorId"), body.get("path"));
     }
 
+    @PostMapping("/heartbeat")
+    public void heartbeat(@RequestBody Map<String, String> body) {
+        analyticsService.heartbeat(body.get("visitorId"));
+    }
+
+    @GetMapping("/online-count")
+    public Map<String, Long> getOnlineCount() {
+        return Map.of("onlineCount", analyticsService.getOnlineCount());
+    }
+
     @GetMapping("/summary")
     public AnalyticsSummaryResponse getSummary() {
         return analyticsService.getSummary();
