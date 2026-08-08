@@ -10,8 +10,6 @@ import com.r24.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-
 @RestController
 @RequestMapping("/api/customers")
 @CrossOrigin(origins = "*")
@@ -42,12 +40,7 @@ public class CustomerController {
         }
 
         Customer customer = customerRepository.findByDeviceId(deviceId)
-                .orElseGet(() -> customerRepository.save(
-                        Customer.builder()
-                                .deviceId(deviceId)
-                                .createdAt(LocalDateTime.now())
-                                .build()
-                ));
+                .orElseGet(() -> customerRepository.save(Customer.forNewDevice(deviceId)));
 
         String token = jwtUtil.generateToken(deviceId);
 
