@@ -18,7 +18,20 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    // Anonymous per-browser identity (a UUID generated client-side and kept
+    // in localStorage) — this is what identifies a returning customer now,
+    // not phone/OTP login. phoneNumber below is just an optional profile
+    // field, kept in sync from the booking form so "My Garage" can look up
+    // service history; it's no longer a login credential.
+    //
+    // Deliberately NOT nullable=false here: with ddl-auto=update, adding a
+    // NOT NULL column to a table that already has rows fails outright on
+    // Postgres. Every row the app itself creates always sets this (see
+    // CustomerController/CustomerAuthHelper), so it's enforced in practice;
+    // this just keeps the migration safe against any pre-existing rows.
+    @Column(unique = true)
+    private String deviceId;
+
     private String phoneNumber;
 
     private String name;
