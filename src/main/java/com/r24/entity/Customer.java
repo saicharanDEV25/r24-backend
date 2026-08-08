@@ -43,4 +43,18 @@ public class Customer {
     private Integer purchaseYear;
 
     private LocalDateTime createdAt;
+
+    // The phone_number column predates deviceId and still carries the old
+    // NOT NULL + UNIQUE constraint in the actual database — ddl-auto=update
+    // only ever adds, it doesn't relax existing constraints when the entity
+    // annotation changes. Seeding phoneNumber with the (already-unique)
+    // deviceId satisfies that leftover constraint without a real phone
+    // number; BookingModal overwrites it with the real one on first booking.
+    public static Customer forNewDevice(String deviceId) {
+        return Customer.builder()
+                .deviceId(deviceId)
+                .phoneNumber(deviceId)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
 }

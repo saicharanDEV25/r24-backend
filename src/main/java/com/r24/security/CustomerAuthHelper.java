@@ -7,8 +7,6 @@ import com.r24.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 /**
  * Resolves the current customer from the request's Bearer token. The JWT
  * subject is an anonymous device id (see DeviceSessionRequest/CustomerController),
@@ -47,11 +45,6 @@ public class CustomerAuthHelper {
         String deviceId = resolveDeviceId(request);
 
         return customerRepository.findByDeviceId(deviceId)
-                .orElseGet(() -> customerRepository.save(
-                        Customer.builder()
-                                .deviceId(deviceId)
-                                .createdAt(LocalDateTime.now())
-                                .build()
-                ));
+                .orElseGet(() -> customerRepository.save(Customer.forNewDevice(deviceId)));
     }
 }
