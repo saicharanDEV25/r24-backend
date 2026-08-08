@@ -10,4 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping backend
-        run: curl -sf -m 30 https://r24-backend.onrender.com/api/products -o /dev/null
+        # Render's free tier spins the service down after ~15 min idle, so
+        # the first ping after a gap has to wait for a cold start. Retry a
+        # few times with a longer per-attempt timeout instead of failing
+        # (and paging) on the very first slow wake-up.
+        run: |
+          for i in 1 2 3; do
+            if curl -sf -m 90 https://r24-backend.onrender.com/api/products -o /dev/null; then
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+          exit 1
