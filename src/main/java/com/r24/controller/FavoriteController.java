@@ -4,7 +4,6 @@ import com.r24.entity.Customer;
 import com.r24.entity.Favorite;
 import com.r24.entity.Product;
 import com.r24.exception.ResourceNotFoundException;
-import com.r24.repository.CustomerRepository;
 import com.r24.repository.FavoriteRepository;
 import com.r24.repository.ProductRepository;
 import com.r24.security.CustomerAuthHelper;
@@ -21,30 +20,21 @@ import java.util.stream.Collectors;
 public class FavoriteController {
 
     private final FavoriteRepository favoriteRepository;
-    private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
     private final CustomerAuthHelper authHelper;
 
     public FavoriteController(FavoriteRepository favoriteRepository,
-                               CustomerRepository customerRepository,
                                ProductRepository productRepository,
                                CustomerAuthHelper authHelper) {
         this.favoriteRepository = favoriteRepository;
-        this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.authHelper = authHelper;
-    }
-
-    private Customer currentCustomer(HttpServletRequest request) {
-        String phone = authHelper.resolvePhoneNumber(request);
-        return customerRepository.findByPhoneNumber(phone)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 
     @GetMapping
     public List<Product> getMyFavorites(HttpServletRequest request) {
 
-        Customer customer = currentCustomer(request);
+        Customer customer = authHelper.resolveCustomer(request);
 
         return favoriteRepository.findByCustomerId(customer.getId())
                 .stream()
@@ -55,7 +45,7 @@ public class FavoriteController {
     @PostMapping("/{productId}")
     public String addFavorite(HttpServletRequest request, @PathVariable Long productId) {
 
-        Customer customer = currentCustomer(request);
+        Customer customer = authHelper.resolveCustomer(request);
 
         boolean alreadySaved = favoriteRepository
                 .findByCustomerIdAndProductId(customer.getId(), productId)
@@ -82,7 +72,7 @@ public class FavoriteController {
     @DeleteMapping("/{productId}")
     public String removeFavorite(HttpServletRequest request, @PathVariable Long productId) {
 
-        Customer customer = currentCustomer(request);
+        Customer customer = authHelper.resolveCustomer(request);
 
         favoriteRepository.findByCustomerIdAndProductId(customer.getId(), productId)
                 .ifPresent(favoriteRepository::delete);

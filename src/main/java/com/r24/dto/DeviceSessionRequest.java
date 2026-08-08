@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OtpRequest {
+public class DeviceSessionRequest {
 
-    private String phoneNumber;
+    private String deviceId;
 }

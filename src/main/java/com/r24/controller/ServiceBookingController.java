@@ -1,5 +1,6 @@
 package com.r24.controller;
 
+import com.r24.entity.Customer;
 import com.r24.entity.ServiceBooking;
 import com.r24.repository.ServiceBookingRepository;
 import com.r24.security.CustomerAuthHelper;
@@ -7,6 +8,7 @@ import com.r24.service.ServiceBookingService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -28,8 +30,16 @@ public class ServiceBookingController {
 
     @GetMapping("/my")
     public List<ServiceBooking> getMyBookings(HttpServletRequest request) {
-        String phone = authHelper.resolvePhoneNumber(request);
-        return repository.findByPhoneNumber(phone);
+        // "My" bookings are still matched by phone number text (same as
+        // before), but that phone now comes from the customer's profile —
+        // kept in sync from whatever they last typed into the booking form —
+        // rather than from a login credential. No phone on file yet (never
+        // booked from this device) just means no history.
+        Customer customer = authHelper.resolveCustomer(request);
+        if (customer.getPhoneNumber() == null) {
+            return Collections.emptyList();
+        }
+        return repository.findByPhoneNumber(customer.getPhoneNumber());
     }
 
     @PostMapping
