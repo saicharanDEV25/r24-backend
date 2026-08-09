@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/favorites")
-@CrossOrigin(origins = "*")
 public class FavoriteController {
 
     private final FavoriteRepository favoriteRepository;

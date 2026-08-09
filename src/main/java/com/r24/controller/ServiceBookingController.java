@@ -6,6 +6,8 @@ import com.r24.repository.ServiceBookingRepository;
 import com.r24.security.CustomerAuthHelper;
 import com.r24.service.ServiceBookingService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -13,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = "*")
 public class ServiceBookingController {
 
     private final ServiceBookingService service;
@@ -42,27 +43,32 @@ public class ServiceBookingController {
         return repository.findByPhoneNumber(customer.getPhoneNumber());
     }
 
+    // Public: a customer creates their own booking here, no login involved.
     @PostMapping
-    public ServiceBooking addBooking(@RequestBody ServiceBooking booking) {
+    public ServiceBooking addBooking(@Valid @RequestBody ServiceBooking booking) {
         return service.addBooking(booking);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<ServiceBooking> getAllBookings() {
         return service.getAllBookings();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ServiceBooking getBookingById(@PathVariable Long id) {
         return service.getBookingById(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ServiceBooking updateBooking(@PathVariable Long id,
                                         @RequestBody ServiceBooking booking) {
         return service.updateBooking(id, booking);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public String deleteBooking(@PathVariable Long id) {
         service.deleteBooking(id);

@@ -2,6 +2,8 @@ package com.r24.controller;
 
 import com.r24.entity.ChatLead;
 import com.r24.repository.ChatLeadRepository;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -10,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chat-leads")
-@CrossOrigin(origins = "*")
 public class ChatLeadController {
 
     private final ChatLeadRepository repository;
@@ -19,23 +20,27 @@ public class ChatLeadController {
         this.repository = repository;
     }
 
+    // Public: the AI chatbot on the public site calls this to capture a lead.
     @PostMapping
-    public ChatLead addLead(@RequestBody ChatLead lead) {
+    public ChatLead addLead(@Valid @RequestBody ChatLead lead) {
         lead.setCreatedAt(LocalDateTime.now());
         lead.setSeen(false);
         return repository.save(lead);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<ChatLead> getAllLeads() {
         return repository.findAllByOrderByCreatedAtDesc();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/unread-count")
     public Map<String, Long> getUnreadCount() {
         return Map.of("count", repository.countBySeenFalse());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/mark-all-seen")
     public String markAllSeen() {
         List<ChatLead> unseen = repository.findAllByOrderByCreatedAtDesc()
@@ -49,6 +54,7 @@ public class ChatLeadController {
         return "Marked " + unseen.size() + " leads as seen";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public String deleteLead(@PathVariable Long id) {
         repository.deleteById(id);
