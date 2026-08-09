@@ -25,6 +25,11 @@ public class Product {
     // shared across every brand, so brand lives on the product itself.
     private String brand;
 
+    // Specific bike model within that brand (e.g. "R15", "TRK 502") — matches
+    // BIKE_BRANDS[brand].models on the frontend. Null means "fits/applies to
+    // every model of that brand", not "unknown".
+    private String model;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
