@@ -1,6 +1,7 @@
 package com.r24.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,9 +19,11 @@ public class ChatLead {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Name is required")
     @Column(nullable = false)
     private String name;
 
+    @NotBlank(message = "Phone number is required")
     @Column(nullable = false)
     private String phoneNumber;
 
