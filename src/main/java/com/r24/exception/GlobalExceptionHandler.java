@@ -8,6 +8,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
@@ -59,6 +62,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, "Not found.");
+    }
+
+    // Malformed request bodies (missing required param/part, bad multipart)
+    // — bad input from a client or a bot probing endpoints, not an app bug.
+    @ExceptionHandler({
+            MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class,
+            MultipartException.class
+    })
+    public ResponseEntity<ErrorResponse> handleMalformedRequest(Exception ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid request.");
     }
 
     @ExceptionHandler(Exception.class)
