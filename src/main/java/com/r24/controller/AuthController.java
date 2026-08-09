@@ -4,6 +4,8 @@ import com.r24.dto.LoginRequest;
 import com.r24.dto.LoginResponse;
 import com.r24.exception.UnauthorizedException;
 import com.r24.security.jwt.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,22 +14,34 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(JwtUtil jwtUtil) {
+    @Value("${app.admin.username}")
+    private String adminUsername;
+
+    @Value("${app.admin.password-hash}")
+    private String adminPasswordHash;
+
+    public AuthController(JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
 
-        if ("admin".equals(request.getUsername())
-                && "admin123".equals(request.getPassword())) {
+        // Always run the hash comparison, even on a wrong username, so a
+        // bad username can't be told apart from a bad password by timing.
+        boolean passwordMatches =
+                passwordEncoder.matches(request.getPassword(), adminPasswordHash);
+        boolean usernameMatches = adminUsername.equals(request.getUsername());
 
-            String token = jwtUtil.generateToken(request.getUsername());
-
-            return new LoginResponse(token);
+        if (!usernameMatches || !passwordMatches) {
+            throw new UnauthorizedException("Invalid Username or Password");
         }
 
-        throw new UnauthorizedException("Invalid Username or Password");
+        String token = jwtUtil.generateToken(request.getUsername(), "ADMIN");
+
+        return new LoginResponse(token);
     }
 }
