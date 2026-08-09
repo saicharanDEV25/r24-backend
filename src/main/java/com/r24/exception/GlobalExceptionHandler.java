@@ -1,6 +1,7 @@
 package com.r24.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -73,6 +74,17 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<ErrorResponse> handleMalformedRequest(Exception ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Invalid request.");
+    }
+
+    // A DB-level constraint (usually a foreign key still pointing at the row
+    // being deleted) — a real data-model gap worth alerting on, but the
+    // caller still deserves a clean 409 instead of a raw 500.
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex,
+                                                               HttpServletRequest request) {
+        errorAlertService.alert(ex, request.getMethod(), request.getRequestURI());
+        return buildResponse(HttpStatus.CONFLICT,
+                "This can't be done right now because it's still linked to other data.");
     }
 
     @ExceptionHandler(Exception.class)

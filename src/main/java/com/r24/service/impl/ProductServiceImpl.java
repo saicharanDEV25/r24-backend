@@ -1,9 +1,11 @@
 package com.r24.service.impl;
 
 import com.r24.entity.Product;
+import com.r24.repository.FavoriteRepository;
 import com.r24.repository.ProductRepository;
 import com.r24.service.ProductService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -11,9 +13,12 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final FavoriteRepository favoriteRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository,
+                               FavoriteRepository favoriteRepository) {
         this.productRepository = productRepository;
+        this.favoriteRepository = favoriteRepository;
     }
 
     @Override
@@ -52,7 +57,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void deleteProduct(Long id) {
+        // A product still favorited by a customer can't be deleted directly
+        // — favorites.product_id is a non-null FK with no cascade, so the
+        // delete would fail with a raw DB constraint violation. Clear those
+        // favorites first; the product is gone from the catalog either way.
+        favoriteRepository.deleteByProductId(id);
         productRepository.deleteById(id);
     }
 }
