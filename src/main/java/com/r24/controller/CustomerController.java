@@ -42,7 +42,7 @@ public class CustomerController {
         Customer customer = customerRepository.findByDeviceId(deviceId)
                 .orElseGet(() -> customerRepository.save(Customer.forNewDevice(deviceId)));
 
-        String token = jwtUtil.generateToken(deviceId);
+        String token = jwtUtil.generateToken(deviceId, "DEVICE");
 
         return new CustomerAuthResponse(token, customer);
     }
