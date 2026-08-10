@@ -17,7 +17,7 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    // Public: customers submit their own review from the site.
     @PostMapping
     public Review addReview(@RequestBody Review review) {
         return reviewService.addReview(review);
