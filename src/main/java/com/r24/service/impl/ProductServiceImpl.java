@@ -1,6 +1,8 @@
 package com.r24.service.impl;
 
+import com.r24.entity.Category;
 import com.r24.entity.Product;
+import com.r24.repository.CategoryRepository;
 import com.r24.repository.FavoriteRepository;
 import com.r24.repository.ProductRepository;
 import com.r24.service.ProductService;
@@ -14,15 +16,19 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final FavoriteRepository favoriteRepository;
+    private final CategoryRepository categoryRepository;
 
     public ProductServiceImpl(ProductRepository productRepository,
-                               FavoriteRepository favoriteRepository) {
+                               FavoriteRepository favoriteRepository,
+                               CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.favoriteRepository = favoriteRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
     public Product addProduct(Product product) {
+        product.setCategory(resolveCategory(product.getCategory()));
         return productRepository.save(product);
     }
 
@@ -48,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
         existing.setName(product.getName());
         existing.setBrand(product.getBrand());
         existing.setModel(product.getModel());
-        existing.setCategory(product.getCategory());
+        existing.setCategory(resolveCategory(product.getCategory()));
         existing.setPrice(product.getPrice());
         existing.setDescription(product.getDescription());
         existing.setImageUrl(product.getImageUrl());
@@ -56,6 +62,22 @@ public class ProductServiceImpl implements ProductService {
         existing.setActive(product.getActive());
 
         return productRepository.save(existing);
+    }
+
+    // The admin now types a category name freehand instead of picking from
+    // a fixed dropdown list — reuse an existing category with that name
+    // (case-insensitive) if one exists, otherwise create it on the fly.
+    private Category resolveCategory(Category incoming) {
+        if (incoming == null || incoming.getName() == null || incoming.getName().isBlank()) {
+            return null;
+        }
+
+        String name = incoming.getName().trim();
+
+        return categoryRepository.findByNameIgnoreCase(name)
+                .orElseGet(() -> categoryRepository.save(
+                        Category.builder().name(name).active(true).build()
+                ));
     }
 
     @Override
