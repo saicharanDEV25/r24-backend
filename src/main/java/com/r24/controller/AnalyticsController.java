@@ -56,8 +56,8 @@ public class AnalyticsController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/visitors")
-    public List<VisitorLogEntry> getVisitorLog() {
-        return analyticsService.getVisitorLog();
+    public List<VisitorLogEntry> getVisitorLog(@RequestParam(required = false) String range) {
+        return analyticsService.getVisitorLog(range);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

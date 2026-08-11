@@ -16,7 +16,7 @@ public interface AnalyticsService {
 
     long getOnlineCount();
 
-    List<VisitorLogEntry> getVisitorLog();
+    List<VisitorLogEntry> getVisitorLog(String range);
 
     void deleteVisitorLog(String ipAddress);
 }

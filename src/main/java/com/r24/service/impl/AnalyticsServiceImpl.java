@@ -46,7 +46,17 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    public List<VisitorLogEntry> getVisitorLog() {
+    public List<VisitorLogEntry> getVisitorLog(String range) {
+        LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+
+        if ("today".equalsIgnoreCase(range)) {
+            return repository.findVisitorLogBetween(startOfToday, startOfToday.plusDays(1));
+        }
+
+        if ("yesterday".equalsIgnoreCase(range)) {
+            return repository.findVisitorLogBetween(startOfToday.minusDays(1), startOfToday);
+        }
+
         return repository.findVisitorLog();
     }
 

@@ -41,4 +41,13 @@ public interface SiteVisitRepository extends JpaRepository<SiteVisit, Long> {
            "GROUP BY s.ipAddress " +
            "ORDER BY COUNT(s) DESC")
     List<com.r24.dto.VisitorLogEntry> findVisitorLog();
+
+    // Same shape as findVisitorLog(), but scoped to visits within [start, end) —
+    // powers the Today/Yesterday filter on the visitor log table.
+    @Query("SELECT new com.r24.dto.VisitorLogEntry(s.ipAddress, COUNT(s), MIN(s.visitedAt), MAX(s.visitedAt)) " +
+           "FROM SiteVisit s " +
+           "WHERE s.visitedAt >= :start AND s.visitedAt < :end " +
+           "GROUP BY s.ipAddress " +
+           "ORDER BY COUNT(s) DESC")
+    List<com.r24.dto.VisitorLogEntry> findVisitorLogBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }
