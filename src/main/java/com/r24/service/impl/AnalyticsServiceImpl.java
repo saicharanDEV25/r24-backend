@@ -51,6 +51,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
+    public void deleteVisitorLog(String ipAddress) {
+        repository.deleteByIpAddress(ipAddress);
+    }
+
+    @Override
     public void heartbeat(String visitorId) {
         lastSeen.put(visitorId, Instant.now());
     }
@@ -78,6 +83,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         long uniqueThisWeek = repository.countDistinctVisitorsSince(startOfWeek);
         long uniqueThisMonth = repository.countDistinctVisitorsSince(startOfMonth);
 
+        long totalVisitors = repository.countDistinctIpsTotal();
+
         List<DailyVisitStat> last7Days = buildLast7DaysStats(startOfWeek);
 
         return new AnalyticsSummaryResponse(
@@ -87,6 +94,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 uniqueToday,
                 uniqueThisWeek,
                 uniqueThisMonth,
+                totalVisitors,
                 last7Days
         );
     }

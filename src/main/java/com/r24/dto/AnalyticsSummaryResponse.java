@@ -17,5 +17,7 @@ public class AnalyticsSummaryResponse {
     private long uniqueVisitorsThisWeek;
     private long uniqueVisitorsThisMonth;
 
+    private long totalVisitors;
+
     private List<DailyVisitStat> last7Days;
 }

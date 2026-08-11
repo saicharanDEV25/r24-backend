@@ -59,4 +59,10 @@ public class AnalyticsController {
     public List<VisitorLogEntry> getVisitorLog() {
         return analyticsService.getVisitorLog();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/visitors/{ipAddress}")
+    public void deleteVisitorLog(@PathVariable String ipAddress) {
+        analyticsService.deleteVisitorLog(ipAddress);
+    }
 }

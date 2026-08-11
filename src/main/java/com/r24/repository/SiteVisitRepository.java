@@ -2,7 +2,10 @@ package com.r24.repository;
 
 import com.r24.entity.SiteVisit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +21,14 @@ public interface SiteVisitRepository extends JpaRepository<SiteVisit, Long> {
     // the site 5 times today should still only count as 1 visit today, not 5.
     @Query("SELECT COUNT(DISTINCT s.ipAddress) FROM SiteVisit s WHERE s.visitedAt >= :since")
     long countDistinctIpsSince(LocalDateTime since);
+
+    @Query("SELECT COUNT(DISTINCT s.ipAddress) FROM SiteVisit s")
+    long countDistinctIpsTotal();
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM SiteVisit s WHERE s.ipAddress = :ipAddress")
+    void deleteByIpAddress(@Param("ipAddress") String ipAddress);
 
     List<SiteVisit> findByVisitedAtAfter(LocalDateTime since);
 
