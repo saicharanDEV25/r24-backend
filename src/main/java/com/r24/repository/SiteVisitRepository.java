@@ -14,6 +14,11 @@ public interface SiteVisitRepository extends JpaRepository<SiteVisit, Long> {
     @Query("SELECT COUNT(DISTINCT s.visitorId) FROM SiteVisit s WHERE s.visitedAt >= :since")
     long countDistinctVisitorsSince(LocalDateTime since);
 
+    // "Visits" is meant to mean distinct people, not raw pings — someone opening
+    // the site 5 times today should still only count as 1 visit today, not 5.
+    @Query("SELECT COUNT(DISTINCT s.ipAddress) FROM SiteVisit s WHERE s.visitedAt >= :since")
+    long countDistinctIpsSince(LocalDateTime since);
+
     List<SiteVisit> findByVisitedAtAfter(LocalDateTime since);
 
     // One row per IP that has ever visited, with how many times and the

@@ -70,9 +70,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         LocalDateTime startOfWeek = startOfToday.minusDays(6);
         LocalDateTime startOfMonth = startOfToday.minusDays(29);
 
-        long visitsToday = repository.countByVisitedAtAfter(startOfToday);
-        long visitsThisWeek = repository.countByVisitedAtAfter(startOfWeek);
-        long visitsThisMonth = repository.countByVisitedAtAfter(startOfMonth);
+        long visitsToday = repository.countDistinctIpsSince(startOfToday);
+        long visitsThisWeek = repository.countDistinctIpsSince(startOfWeek);
+        long visitsThisMonth = repository.countDistinctIpsSince(startOfMonth);
 
         long uniqueToday = repository.countDistinctVisitorsSince(startOfToday);
         long uniqueThisWeek = repository.countDistinctVisitorsSince(startOfWeek);
