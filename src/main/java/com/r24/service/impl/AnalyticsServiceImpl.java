@@ -2,6 +2,7 @@ package com.r24.service.impl;
 
 import com.r24.dto.AnalyticsSummaryResponse;
 import com.r24.dto.DailyVisitStat;
+import com.r24.dto.VisitorLogEntry;
 import com.r24.entity.SiteVisit;
 import com.r24.repository.SiteVisitRepository;
 import com.r24.service.AnalyticsService;
@@ -31,16 +32,22 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    public SiteVisit trackVisit(String visitorId, String path) {
+    public SiteVisit trackVisit(String visitorId, String path, String ipAddress) {
         heartbeat(visitorId);
 
         return repository.save(
                 SiteVisit.builder()
                         .visitorId(visitorId)
                         .path(path)
+                        .ipAddress(ipAddress)
                         .visitedAt(LocalDateTime.now())
                         .build()
         );
+    }
+
+    @Override
+    public List<VisitorLogEntry> getVisitorLog() {
+        return repository.findVisitorLog();
     }
 
     @Override

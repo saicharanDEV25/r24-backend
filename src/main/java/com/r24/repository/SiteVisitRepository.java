@@ -15,4 +15,14 @@ public interface SiteVisitRepository extends JpaRepository<SiteVisit, Long> {
     long countDistinctVisitorsSince(LocalDateTime since);
 
     List<SiteVisit> findByVisitedAtAfter(LocalDateTime since);
+
+    // One row per IP that has ever visited, with how many times and the
+    // first/last time — ordered so the most frequent (regular) visitors
+    // show up first. IPs are never null (captured server-side on every
+    // ping), so this doesn't need a null guard.
+    @Query("SELECT new com.r24.dto.VisitorLogEntry(s.ipAddress, COUNT(s), MIN(s.visitedAt), MAX(s.visitedAt)) " +
+           "FROM SiteVisit s " +
+           "GROUP BY s.ipAddress " +
+           "ORDER BY COUNT(s) DESC")
+    List<com.r24.dto.VisitorLogEntry> findVisitorLog();
 }
