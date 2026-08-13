@@ -19,15 +19,10 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    // Free-text bike brand ("KTM", "Royal Enfield", "Yamaha", "Benelli" —
-    // matches BIKE_BRANDS on the frontend). Not a FK: categories (Air
-    // Filters, Chain & Sprockets, etc.) are brand-agnostic part types
-    // shared across every brand, so brand lives on the product itself.
+    // Free-text bike brand, matches BIKE_BRANDS on the frontend. Not a FK since categories are brand-agnostic.
     private String brand;
 
-    // Specific bike model within that brand (e.g. "R15", "TRK 502") — matches
-    // BIKE_BRANDS[brand].models on the frontend. Null means "fits/applies to
-    // every model of that brand", not "unknown".
+    // Specific model within brand, matches BIKE_BRANDS[brand].models. Null means "fits every model", not "unknown".
     private String model;
 
     @ManyToOne

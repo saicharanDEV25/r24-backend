@@ -17,8 +17,7 @@ public interface SiteVisitRepository extends JpaRepository<SiteVisit, Long> {
     @Query("SELECT COUNT(DISTINCT s.visitorId) FROM SiteVisit s WHERE s.visitedAt >= :since")
     long countDistinctVisitorsSince(LocalDateTime since);
 
-    // "Visits" is meant to mean distinct people, not raw pings — someone opening
-    // the site 5 times today should still only count as 1 visit today, not 5.
+    // Distinct IPs, not raw pings — a repeat visit today still counts once.
     @Query("SELECT COUNT(DISTINCT s.ipAddress) FROM SiteVisit s WHERE s.visitedAt >= :since")
     long countDistinctIpsSince(LocalDateTime since);
 
@@ -32,18 +31,14 @@ public interface SiteVisitRepository extends JpaRepository<SiteVisit, Long> {
 
     List<SiteVisit> findByVisitedAtAfter(LocalDateTime since);
 
-    // One row per IP that has ever visited, with how many times and the
-    // first/last time — ordered so the most frequent (regular) visitors
-    // show up first. IPs are never null (captured server-side on every
-    // ping), so this doesn't need a null guard.
+    // One row per IP with visit count and first/last time, most frequent first. IP is always set, no null guard needed.
     @Query("SELECT new com.r24.dto.VisitorLogEntry(s.ipAddress, COUNT(s), MIN(s.visitedAt), MAX(s.visitedAt)) " +
            "FROM SiteVisit s " +
            "GROUP BY s.ipAddress " +
            "ORDER BY COUNT(s) DESC")
     List<com.r24.dto.VisitorLogEntry> findVisitorLog();
 
-    // Same shape as findVisitorLog(), but scoped to visits within [start, end) —
-    // powers the Today/Yesterday filter on the visitor log table.
+    // Same as findVisitorLog() but scoped to [start, end) for the Today/Yesterday filter.
     @Query("SELECT new com.r24.dto.VisitorLogEntry(s.ipAddress, COUNT(s), MIN(s.visitedAt), MAX(s.visitedAt)) " +
            "FROM SiteVisit s " +
            "WHERE s.visitedAt >= :start AND s.visitedAt < :end " +

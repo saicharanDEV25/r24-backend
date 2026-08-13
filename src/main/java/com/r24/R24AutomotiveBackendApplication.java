@@ -11,9 +11,8 @@ import java.util.TimeZone;
 public class R24AutomotiveBackendApplication {
 
     public static void main(String[] args) {
-        // Render runs the server in UTC by default, but LocalDateTime.now() (used for
-        // every createdAt/visitedAt timestamp) has no timezone info attached when saved.
-        // The frontend parses it as local (IST) time, so without this it's off by 5:30.
+        // Render runs in UTC, but LocalDateTime.now() has no timezone attached when saved,
+        // and the frontend parses it as IST — without this timestamps are off by 5:30.
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
         SpringApplication.run(R24AutomotiveBackendApplication.class, args);
     }

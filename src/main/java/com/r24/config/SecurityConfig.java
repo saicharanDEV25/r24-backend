@@ -38,9 +38,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Replaces the @CrossOrigin(origins = "*") that used to sit on every
-    // controller — one allowlist, driven by an env var so the real
-    // frontend/admin URLs never need to be hardcoded here.
+    // Single allowlist driven by an env var, so origins never need to be hardcoded here.
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
             @Value("${app.cors.allowed-origins}") String allowedOrigins) {

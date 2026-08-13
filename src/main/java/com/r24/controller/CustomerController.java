@@ -8,6 +8,7 @@ import com.r24.repository.CustomerRepository;
 import com.r24.security.CustomerAuthHelper;
 import com.r24.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,9 +27,7 @@ public class CustomerController {
         this.jwtUtil = jwtUtil;
     }
 
-    // No login step: the frontend generates a device id once (stored in
-    // localStorage) and calls this on every load to get/create the matching
-    // Customer row and a JWT for it. Same device id -> same customer.
+    // No login: frontend generates a device id once and calls this on every load to get/create the matching Customer + JWT.
     @PostMapping("/session")
     public CustomerAuthResponse createSession(@RequestBody DeviceSessionRequest request) {
 
@@ -38,12 +37,22 @@ public class CustomerController {
             throw new BadRequestException("Missing device id");
         }
 
-        Customer customer = customerRepository.findByDeviceId(deviceId)
-                .orElseGet(() -> customerRepository.save(Customer.forNewDevice(deviceId)));
+        Customer customer = findOrCreateCustomer(deviceId);
 
         String token = jwtUtil.generateToken(deviceId, "DEVICE");
 
         return new CustomerAuthResponse(token, customer);
+    }
+
+    // Two requests for the same brand-new deviceId can race (e.g. React StrictMode's double effect
+    // invocation) — if both miss findByDeviceId, only one save() wins on the unique constraint.
+    private Customer findOrCreateCustomer(String deviceId) {
+        try {
+            return customerRepository.findByDeviceId(deviceId)
+                    .orElseGet(() -> customerRepository.save(Customer.forNewDevice(deviceId)));
+        } catch (DataIntegrityViolationException e) {
+            return customerRepository.findByDeviceId(deviceId).orElseThrow(() -> e);
+        }
     }
 
     @GetMapping("/me")
@@ -56,9 +65,7 @@ public class CustomerController {
 
         Customer customer = authHelper.resolveCustomer(request);
 
-        // Only overwrite fields that were actually sent — different callers
-        // (profile form, garage form, booking-modal phone sync) each send a
-        // different subset, and a blind overwrite would null out the rest.
+        // Only overwrite fields that were sent; different callers send different subsets.
         if (updates.getName() != null) customer.setName(updates.getName());
         if (updates.getEmail() != null) customer.setEmail(updates.getEmail());
         if (updates.getBikeModel() != null) customer.setBikeModel(updates.getBikeModel());

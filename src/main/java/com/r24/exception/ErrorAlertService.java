@@ -11,10 +11,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ConcurrentHashMap;
 
-// Emails a plain "something broke, here's where" alert whenever an
-// unexpected exception reaches GlobalExceptionHandler. Throttled per
-// exception+path so a repeating bug can't flood the inbox, and disabled by
-// default until ALERT_MAIL_* env vars and app.alert.enabled=true are set.
+// Emails an alert when an unexpected exception reaches GlobalExceptionHandler.
+// Throttled per exception+path; disabled unless ALERT_MAIL_* and app.alert.enabled=true are set.
 @Service
 public class ErrorAlertService {
 
@@ -55,7 +53,6 @@ public class ErrorAlertService {
             message.setText(buildBody(ex, method, path, now));
             mailSender.send(message);
         } catch (Exception mailError) {
-            // Never let a failed alert email cause further problems.
             System.err.println("Failed to send error alert email: " + mailError.getMessage());
         }
     }

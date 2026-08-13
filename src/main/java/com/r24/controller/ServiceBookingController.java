@@ -31,11 +31,7 @@ public class ServiceBookingController {
 
     @GetMapping("/my")
     public List<ServiceBooking> getMyBookings(HttpServletRequest request) {
-        // "My" bookings are still matched by phone number text (same as
-        // before), but that phone now comes from the customer's profile —
-        // kept in sync from whatever they last typed into the booking form —
-        // rather than from a login credential. No phone on file yet (never
-        // booked from this device) just means no history.
+        // Matched by phone number from the customer's profile, not a login; no phone on file means no history.
         Customer customer = authHelper.resolveCustomer(request);
         if (customer.getPhoneNumber() == null) {
             return Collections.emptyList();

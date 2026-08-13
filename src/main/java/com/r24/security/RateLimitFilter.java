@@ -17,11 +17,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Simple in-memory per-IP rate limiting for the handful of public endpoints
- * that are worth abuse-proofing (login brute-force, form/booking spam,
- * device-session creation, image upload cost). In-memory is fine for a
- * single Render instance; if this ever runs on more than one instance, the
- * bucket map would need to move to a shared store (e.g. Redis) instead.
+ * In-memory per-IP rate limiting for abuse-prone public endpoints.
+ * Fine for a single Render instance; would need a shared store (e.g. Redis) across multiple instances.
  */
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {

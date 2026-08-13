@@ -26,9 +26,8 @@ public class AnalyticsController {
         analyticsService.trackVisit(body.get("visitorId"), body.get("path"), resolveClientIp(request));
     }
 
-    // Render (and most PaaS hosts) sit behind a proxy, so request.getRemoteAddr()
-    // returns the proxy's internal address, not the visitor's real IP —
-    // the real one is the first entry in X-Forwarded-For when present.
+    // Render sits behind a proxy, so getRemoteAddr() returns its address, not the visitor's;
+    // the real IP is the first entry in X-Forwarded-For when present.
     private String resolveClientIp(HttpServletRequest request) {
         String forwardedFor = request.getHeader("X-Forwarded-For");
         if (forwardedFor != null && !forwardedFor.isBlank()) {

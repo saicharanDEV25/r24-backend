@@ -64,9 +64,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(existing);
     }
 
-    // The admin now types a category name freehand instead of picking from
-    // a fixed dropdown list — reuse an existing category with that name
-    // (case-insensitive) if one exists, otherwise create it on the fly.
+    // Reuses an existing category (case-insensitive) if the name matches, otherwise creates one.
     private Category resolveCategory(Category incoming) {
         if (incoming == null || incoming.getName() == null || incoming.getName().isBlank()) {
             return null;
@@ -83,10 +81,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void deleteProduct(Long id) {
-        // A product still favorited by a customer can't be deleted directly
-        // — favorites.product_id is a non-null FK with no cascade, so the
-        // delete would fail with a raw DB constraint violation. Clear those
-        // favorites first; the product is gone from the catalog either way.
+        // favorites.product_id is a non-null FK with no cascade; clear favorites first or the delete fails.
         favoriteRepository.deleteByProductId(id);
         productRepository.deleteById(id);
     }
