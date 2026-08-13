@@ -8,10 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 /**
- * Resolves the current customer from the request's Bearer token. The JWT
- * subject is an anonymous device id (see DeviceSessionRequest/CustomerController),
- * not a phone number — there's no login step, so resolveCustomer() creates
- * the Customer row on first use if it doesn't exist yet.
+ * Resolves the current customer from the request's Bearer token. JWT subject is an anonymous
+ * device id, not a phone number; resolveCustomer() creates the Customer row on first use.
  */
 @Component
 public class CustomerAuthHelper {

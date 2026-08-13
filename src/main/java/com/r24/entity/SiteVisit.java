@@ -23,11 +23,8 @@ public class SiteVisit {
 
     private String path;
 
-    // Real client IP (X-Forwarded-For, since Render sits behind a proxy) —
-    // lets the admin see where visits are coming from and spot the same
-    // person/network visiting repeatedly, independent of the browser-local
-    // visitorId (which resets if the visitor clears storage or switches
-    // browsers).
+    // Real client IP via X-Forwarded-For (Render sits behind a proxy); more stable than
+    // visitorId, which resets when the visitor clears storage or switches browsers.
     private String ipAddress;
 
     @Column(nullable = false)

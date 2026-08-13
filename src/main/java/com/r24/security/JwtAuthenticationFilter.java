@@ -50,10 +50,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-            // Invalid/expired token: leave the context empty rather than
-            // rejecting here — permitAll routes must still work for
-            // anonymous/device callers, and protected routes will simply
-            // find no authentication and deny.
+            // Invalid/expired token: leave context empty instead of rejecting here, so permitAll
+            // routes still work for anonymous callers; protected routes deny on missing auth.
         }
 
         filterChain.doFilter(request, response);

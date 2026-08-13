@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Seeds a realistic KTM genuine-parts and riding-gear catalog on first run.
- * Each block is guarded by its own marker category so it never re-runs or
- * duplicates rows once seeded, and never touches categories/products an
- * admin has already created.
+ * Seeds the KTM parts/gear catalog on first run. Each block is guarded by
+ * its own marker category so it never re-seeds or touches admin-created data.
  */
 @Component
 @RequiredArgsConstructor
@@ -157,11 +155,7 @@ public class KtmPartsDataSeeder implements CommandLineRunner {
         ));
     }
 
-    /**
-     * Adds ~100 more genuine-parts products across the existing KTM
-     * Accessories categories plus several new ones, covering every KTM
-     * model family from the 125 Duke up to the 1290 Super Duke R.
-     */
+    // Expands the catalog into existing categories plus new ones, covering every KTM model family.
     private void seedExpandedKtmAccessories() {
         Category airFilters = getOrCreateCategory("Air Filters", "Genuine and performance air filters for KTM Duke & RC models.");
         Category oilFilters = getOrCreateCategory("Oil Filters", "Genuine engine oil filters for reliable filtration and engine life.");

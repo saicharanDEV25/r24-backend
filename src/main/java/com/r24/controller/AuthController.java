@@ -29,8 +29,7 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
 
-        // Always run the hash comparison, even on a wrong username, so a
-        // bad username can't be told apart from a bad password by timing.
+        // Always run the hash comparison so a bad username can't be timed against a bad password.
         boolean passwordMatches =
                 passwordEncoder.matches(request.getPassword(), adminPasswordHash);
         boolean usernameMatches = adminUsername.equals(request.getUsername());

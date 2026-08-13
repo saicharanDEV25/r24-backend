@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    // Thrown by @Valid on a @RequestBody — bad user input, not an app bug.
+    // @Valid failures on @RequestBody — bad input, not an app bug.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
@@ -50,23 +50,19 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, message.isBlank() ? "Invalid input." : message);
     }
 
-    // @PreAuthorize rejections are routine (someone without an admin token
-    // hit an admin-only endpoint) — not an application error, so this must
-    // stay above the generic handler and must NOT alert.
+    // Routine @PreAuthorize rejection, not an app error; must stay above the generic handler and never alert.
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, "You don't have permission to do that.");
     }
 
-    // Someone/something (health checks, bots, browsers) hitting a path with
-    // no handler — routine internet noise, not an app bug, must not alert.
+    // Health checks/bots hitting an unmapped path — routine noise, don't alert.
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, "Not found.");
     }
 
-    // Malformed request bodies (missing required param/part, bad multipart)
-    // — bad input from a client or a bot probing endpoints, not an app bug.
+    // Malformed request bodies — bad client input, not an app bug.
     @ExceptionHandler({
             MissingServletRequestParameterException.class,
             MissingServletRequestPartException.class,
@@ -76,9 +72,7 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Invalid request.");
     }
 
-    // A DB-level constraint (usually a foreign key still pointing at the row
-    // being deleted) — a real data-model gap worth alerting on, but the
-    // caller still deserves a clean 409 instead of a raw 500.
+    // Usually a stale FK on delete — worth alerting on, but caller gets a clean 409 not a 500.
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex,
                                                                HttpServletRequest request) {
